@@ -1,4 +1,3 @@
-# OS_Pokemon
 # Projet "Quel est ce Pokémon ?" -
 
 Bienvenue sur notre référentiel GitHub pour le projet "Quel est ce Pokémon ?". Notre équipe est ravie de présenter ce projet passionnant réalisé dans le cadre du cours INFO-F-201 - Systèmes d'exploitation.
@@ -17,10 +16,6 @@ Notre projet se compose des éléments suivants :
 2. **list-file** : Un script Bash destiné à répertorier les fichiers d'un dossier.
 3. **img-search** : Un programme en C ou C++ qui reçoit le chemin vers une image et identifie l'image la plus similaire parmi celles de notre base d'images, transmises via stdin.
 4. **launcher** : Un script Bash permettant de lancer le programme img-search.
-
-## Collaboration d'Équipe
-
-Notre projet est réalisé en groupe, conformément aux directives du cours. Si vous ne faites pas déjà partie d'un groupe, veuillez contacter Arnaud Leponce (arnaud.leponce@ulb.be) avant le 26 octobre 2023. Nous vous recommandons de ne pas réaliser ce projet individuellement sans avoir discuté au préalable avec M. Leponce.
 
 ## Fonctionnalités Prises en Charge
 
@@ -81,5 +76,5 @@ Pour soumettre notre projet, nous devons créer un fichier ZIP contenant :
 
 Nous ne devons pas inclure la banque d'images fournie ni les répertoires `img-dist/` et `test/` ainsi que leur contenu.
 
-Nous devons soumettre notre projet sur l'Université Virtuelle avant la ####date limite du 12 novembre 2023, à 23h59.
+Nous devons soumettre notre projet sur l'Université Virtuelle avant la **date limite du 12 novembre 2023, à 23h59.**
 
