@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Vérifier les options de mode (-i ou -a)
+if [ "$1" = "-i" ] || [ "$1" = "--interactive" ]; then
+    mode="interactive"
+    echo "Mode interactif activé."
+elif [ "$1" = "-a" ] || [ "$1" = "--automatic" ]; then
+    mode="automatic"
+    echo "Mode automatique activé."
+else
+    echo "Error: Invalid mode option. Use -i or -a." >&2
+    exit 1
+fi
+
+# Récupérer le chemin de l'image à comparer
+image="$2"
+echo "Image à comparer : $image"
+
+# Récupérer le chemin de la base de données (dossier des images) avec une valeur par défaut
+database_path="${3:-./img/}"
+echo "Chemin de la base de données : $database_path"
+
+# Assurez-vous que le chemin img-dist est correct (modifiez-le si nécessaire)
+img_dist_path="./img-dist/img-dist"
+
+# Vérifier si le chemin img-dist existe
+if [ ! -x "$img_dist_path" ]; then
+    echo "Error: img-dist not found or not executable." >&2
+    exit 1
+fi
+
+# Lancer le programme img-search en fonction du mode
+if [ "$mode" = "interactive" ]; then
+    # Mode interactif - l'utilisateur transmet manuellement les images via stdin
+    if [ -f "$image" ]; then
+        # Vérifier si l'image spécifiée existe
+        echo "Exécution de img-search en mode interactif."
+        echo "A completer"
+        cat | "$img_dist_path" "$image"
+    else
+        echo "Error: The specified image does not exist." >&2
+        exit 1
+    fi
+elif [ "$mode" = "automatic" ]; then
+    # Mode automatique - le script liste les fichiers du dossier et les transmet à img-search via stdin
+    if [ -d "$database_path" ]; then
+        echo "Exécution de img-search en mode automatique."
+        echo "A completer"
+        ./list-file "$database_path" 
+    else
+        echo "Error: The specified database path is not a directory." >&2
+        exit 1
+    fi
+fi
+
