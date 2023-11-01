@@ -3,31 +3,45 @@
 # Vérifier les options de mode (-i ou -a)
 if [ "$1" = "-i" ] || [ "$1" = "--interactive" ]; then
     mode="interactive"
-    echo "Mode interactif activé."
+    shift
 elif [ "$1" = "-a" ] || [ "$1" = "--automatic" ]; then
     mode="automatic"
-    echo "Mode automatique activé."
+    shift
 else
-    echo "Error: Invalid mode option. Use -i or -a." >&2
+    echo "Error: Option de mode invalide. Utilisez -i ou -a." >&2
     exit 1
 fi
 
 # Récupérer le chemin de l'image à comparer
-image="$2"
-echo "Image à comparer : $image"
+image="$1"
+if [ -z "$image" ]; then
+    echo "Error: Image à comparer non spécifiée." >&2
+    exit 1
+fi
 
 # Récupérer le chemin de la base de données (dossier des images) avec une valeur par défaut
-database_path="${3:-./img/}"
-echo "Chemin de la base de données : $database_path"
+database_path="${2:-./img/}"
+
+# Assurez-vous que le chemin img-search est correct (modifiez-le si nécessaire)
+img_search_path="./img-search"
 
 # Assurez-vous que le chemin img-dist est correct (modifiez-le si nécessaire)
-img_dist_path="./img-dist/img-dist"
+img_dist_path="./img-dist"
+
+# Vérifier si le chemin img-search existe
+if [ ! -x "$img_search_path" ]; then
+    echo "Error: img-search introuvable ou non exécutable." >&2
+    exit 1
+fi
 
 # Vérifier si le chemin img-dist existe
 if [ ! -x "$img_dist_path" ]; then
-    echo "Error: img-dist not found or not executable." >&2
+    echo "Error: img-dist introuvable ou non exécutable." >&2
     exit 1
 fi
+
+# Modifier la variable $PATH pour img-search et ses fils
+export PATH="$PATH:$(dirname $img_dist_path)"
 
 # Lancer le programme img-search en fonction du mode
 if [ "$mode" = "interactive" ]; then
@@ -35,20 +49,18 @@ if [ "$mode" = "interactive" ]; then
     if [ -f "$image" ]; then
         # Vérifier si l'image spécifiée existe
         echo "Exécution de img-search en mode interactif."
-        echo "A completer"
-        cat | "$img_dist_path" "$image"
+        cat "$image" | "$img_search_path"
     else
-        echo "Error: The specified image does not exist." >&2
+        echo "Error: L'image spécifiée n'existe pas." >&2
         exit 1
     fi
 elif [ "$mode" = "automatic" ]; then
     # Mode automatique - le script liste les fichiers du dossier et les transmet à img-search via stdin
     if [ -d "$database_path" ]; then
         echo "Exécution de img-search en mode automatique."
-        echo "A completer"
-        ./list-file "$database_path" 
+        find "$database_path" -type f | "$img_search_path" < "$image"
     else
-        echo "Error: The specified database path is not a directory." >&2
+        echo "Error: Le chemin de la base de données spécifié n'est pas un répertoire." >&2
         exit 1
     fi
 fi
