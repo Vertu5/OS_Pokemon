@@ -1,17 +1,21 @@
 #!/bin/bash
 
-# Vérifier si le chemin du dossier a été fourni en argument
+# Check if the directory path is provided as a command line argument
 if [ $# -ne 1 ]; then
-    echo "Error: Missing directory name." >&2
+    echo "Missing directory name." >&2
     exit 1
 fi
 
-# Vérifier si le chemin spécifié est un répertoire
-if [ ! -d "$1" ]; then
-    echo "Error: The specified path is not a directory." >&2
+# Get the directory path from the command line argument
+directory="$1"
+
+# Check if the path is a directory
+if [ ! -d "$directory" ]; then
+    echo "The specified path is not a directory." >&2
     exit 2
 fi
 
-# Utiliser la commande 'ls' pour lister les fichiers du dossier (ignorer les sous-dossiers)
-ls -p "$1" | grep -v /
+# List files in the directory (ignores subdirectories)
+ls -p "$directory" | grep -v '/'
+
 

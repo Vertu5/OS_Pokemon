@@ -1,67 +1,53 @@
 #!/bin/bash
 
-# Vérifier les options de mode (-i ou -a)
-if [ "$1" = "-i" ] || [ "$1" = "--interactive" ]; then
-    mode="interactive"
-    shift
-elif [ "$1" = "-a" ] || [ "$1" = "--automatic" ]; then
-    mode="automatic"
-    shift
-else
-    echo "Error: Option de mode invalide. Utilisez -i ou -a." >&2
-    exit 1
-fi
+interactive_mode() {
+    echo "Interactive mode - Enter images one by one:"
+    img_search_exe="./img-search"
+    image_to_compare="$1"
+    database_path="$2"
 
-# Récupérer le chemin de l'image à comparer
-image="$1"
-if [ -z "$image" ]; then
-    echo "Error: Image à comparer non spécifiée." >&2
-    exit 1
-fi
+    while read -r image; do
+        if [ -f "$image" ]; then
+            echo "$image_to_compare" | $img_search_exe "$image" "$database_path"
+        else
+            echo "Invalid image path: $image"
+        fi
+    done
+}
 
-# Récupérer le chemin de la base de données (dossier des images) avec une valeur par défaut
-database_path="${2:-./img/}"
+automatic_mode() {
+    echo "Automatic mode"
+    img_search_exe="./img-search"
+    image_to_compare="$1"
+    database_path="${2:-./img/}"
 
-# Assurez-vous que le chemin img-search est correct (modifiez-le si nécessaire)
-img_search_path="./img-search"
-
-# Assurez-vous que le chemin img-dist est correct (modifiez-le si nécessaire)
-img_dist_path="./img-dist"
-
-# Vérifier si le chemin img-search existe
-if [ ! -x "$img_search_path" ]; then
-    echo "Error: img-search introuvable ou non exécutable." >&2
-    exit 1
-fi
-
-# Vérifier si le chemin img-dist existe
-if [ ! -x "$img_dist_path" ]; then
-    echo "Error: img-dist introuvable ou non exécutable." >&2
-    exit 1
-fi
-
-# Modifier la variable $PATH pour img-search et ses fils
-export PATH="$PATH:$(dirname $img_dist_path)"
-
-# Lancer le programme img-search en fonction du mode
-if [ "$mode" = "interactive" ]; then
-    # Mode interactif - l'utilisateur transmet manuellement les images via stdin
-    if [ -f "$image" ]; then
-        # Vérifier si l'image spécifiée existe
-        echo "Exécution de img-search en mode interactif."
-        cat "$image" | "$img_search_path"
-    else
-        echo "Error: L'image spécifiée n'existe pas." >&2
-        exit 1
-    fi
-elif [ "$mode" = "automatic" ]; then
-    # Mode automatique - le script liste les fichiers du dossier et les transmet à img-search via stdin
     if [ -d "$database_path" ]; then
-        echo "Exécution de img-search en mode automatique."
-        find "$database_path" -type f | "$img_search_path" < "$image"
+        # Use list-file script to get a list of images in the directory
+        image_list=$(./list-file "$database_path")
+
+        # Append the database_path to each image in the list
+        image_list_with_path=""
+        while read -r image; do
+            if [ -f "$database_path$image" ]; then
+                image_list_with_path="$image_list_with_path $database_path$image"
+            else
+                echo "Invalid image path: $database_path$image"
+            fi
+        done <<< "$image_list"
+
+        # Pass both the image to compare and the list to img-search
+        echo "$image_to_compare $image_list_with_path" | $img_search_exe
     else
-        echo "Error: Le chemin de la base de données spécifié n'est pas un répertoire." >&2
-        exit 1
+        echo "Invalid database path: $database_path"
     fi
+}
+
+if [ "$1" == "-i" ] || [ "$1" == "--interactive" ]; then
+    interactive_mode "$2" "$3"
+elif [ "$1" == "-a" ] || [ "$1" == "--automatic" ]; then
+    automatic_mode "$2" "$3"
+else
+    echo "Usage: $0 [-i|--interactive|-a|--automatic] image [database_path]"
+    exit 1
 fi
 
