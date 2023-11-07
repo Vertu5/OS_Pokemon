@@ -12,26 +12,26 @@
 #include <cstring>
 #include <csignal>
 
-// Structure for shared memory
+// Structure pour la mémoire partagée 
 struct SharedData {
-    int minDistance;   // Shared minimum distance
-    char imagePath[256]; // Path of the most similar image
+    int minDistance;   // Distance partagée minimale
+    char imagePath[256]; // Chemin vers l'image la plus semblable
 };
 
-// Declare pid1 and pid2 globally to be accessible by the signal handler
+// Déclaration globale de pid1 et pid2 pour être accessibles pour le gestionnaire de signaux
 pid_t pid1, pid2;
 
-// Global flag to indicate whether a SIGINT was received
+// Flag globale pour indiquer la réception de SIGINT
 volatile bool sigintReceived = false;
 
-// Signal handler for SIGINT
+// Gestionnaire de signal pour SIGINT
 void sigintHandler(int signum) {
     if (signum == SIGINT) {
         sigintReceived = true;
     }
 }
 
-// Function to run img-dist and store the result in the results
+// Fonction pour lancer img-dist et stocker ses résultats
 void runImgDist(const std::string& imgDistCmd, const std::string& image1Path, const std::string& image2Path, SharedData* sharedData) {
     std::string commande = imgDistCmd + " " + image1Path + " " + image2Path;
 
@@ -41,22 +41,22 @@ void runImgDist(const std::string& imgDistCmd, const std::string& image1Path, co
 
         if (WIFEXITED(status)) {
             int exit_status = WEXITSTATUS(status);
-            // Check if the result is smaller than the shared minimum distance
+            // Vérification si le résultats est inférieur à la distance partagée minimale
             if (exit_status < sharedData->minDistance) {
                 sharedData->minDistance = exit_status;
                 std::strcpy(sharedData->imagePath, image2Path.c_str());
             }
 
-            // Check if the result is 0
+            // Vérifier si le résultat est 0
             if (exit_status == 0) {
-                // Exit immediately
+                // Sortie immédiate
                 exit(0);
             }
         }
     }
 }
 int main(int argc, char* argv[]) {
-    // Register the signal handler for SIGINT
+    // Déclaration du gestionnaire de signaux pour SIGINT
     signal(SIGINT, sigintHandler);
 
     if (argc < 4) {
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
     std::string imageToCompare = argv[2];
     std::string databasePath = argv[3];
 
-    std::string imgDistCmd = "./img-dist/img-dist"; // Assuming img-dist is in the $PATH
+    std::string imgDistCmd = "./img-dist/img-dist"; // En supposant que img-dist se trouve dans $PATH
 
     key_t shmkey = ftok(".", 'a');
     int shmid = shmget(shmkey, sizeof(SharedData), IPC_CREAT | 0666);
@@ -88,11 +88,11 @@ int main(int argc, char* argv[]) {
     sharedData->imagePath[0] = '\0';
 
     std::vector<std::string> imagePaths;
-    std::string imageListPath = "./list-file"; // Assuming list-file is in the same directory
+    std::string imageListPath = "./list-file"; // En suppoosant que la list-file se trouve dans le même dossier
     std::string imageListFilePath;
 
     if (mode == "-i" || mode == "--interactive") {
-        // Interactive mode - Read image paths interactively
+        // Interactive mode - Mode interactif - lecture immédiate des chemins des images 
         std::string imagePath;
         std::cout << "Interactive mode - Enter image paths one by one (type 'exit' to finish):\n";
         while (true) {
@@ -113,13 +113,13 @@ int main(int argc, char* argv[]) {
             }
         }
     } else if (mode == "-a" || mode == "--automatic") {
-        // Automatic mode - Read the list of images from the list-file script
+        // Mode automatique - lecture de la liste des images du script list-file
         imageListFilePath = imageListPath + " " + databasePath;
         FILE *listFile = popen(imageListFilePath.c_str(), "r");
         if (listFile) {
             char buffer[256];
             while (fgets(buffer, sizeof(buffer), listFile)) {
-                buffer[strcspn(buffer, "\n")] = '\0'; // Remove newline character
+                buffer[strcspn(buffer, "\n")] = '\0'; // Retire le charactère saut de ligne
                 std::string imagePath = databasePath + buffer;
                 if (listFile) {
                     imagePaths.push_back(imagePath);
@@ -141,10 +141,10 @@ int main(int argc, char* argv[]) {
         std::cerr << "Fork failed." << std::endl;
         return 1;
     } else if (pid1 == 0) {
-        // The first child process handles the first half of comparisons
+        // Le premier processus fils gère la première moitié des comparaisons
         for (const std::string& path : imagePaths) {
             if (sigintReceived) {
-                exit(0); // Terminate the child process gracefully
+                exit(0); // Termine le processus fils de manière propre
             }
             runImgDist(imgDistCmd, imageToCompare, path, sharedData);
         }
@@ -155,16 +155,16 @@ int main(int argc, char* argv[]) {
             std::cerr << "Fork failed." << std::endl;
             return 1;
         } else if (pid2 == 0) {
-            // The second child process handles the second half of comparisons
+            // Le deuxième processus fils gère la deuxième moitié des comparaisons
             for (const std::string& path : imagePaths) {
                 if (sigintReceived) {
-                    exit(0); // Terminate the child process gracefully
+                    exit(0); // Termine le processus fils de manière propre
                 }
                 runImgDist(imgDistCmd, imageToCompare, path, sharedData);
             }
             exit(0);
         } else {
-            // This is the parent process
+            // Processus père
             int status;
             waitpid(pid1, &status, 0);
             waitpid(pid2, &status, 0);
