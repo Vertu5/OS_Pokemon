@@ -2,10 +2,7 @@
 
 Bienvenue sur notre référentiel GitHub pour le projet "Quel est ce Pokémon ?". Notre équipe est ravie de présenter ce projet passionnant réalisé dans le cadre du cours INFO-F-201 - Systèmes d'exploitation.
 ## Lancer le projet
-Dans `img-dist` utiliser dans le terminal la commande `make` puis tester avec `./img-dist -v ../img/1.bmp ../img/20.bmp` et `./img-dist ../img/1.bmp ../img/20.bmp`.
-
-Dans `base-project/` `chmod +x launcher` et `list-file` pour donner la permission aux fichier bash puis `g++ img-search.cpp -o img-search` pour le code c++. Pour tester list file : `./list-file img/`. Pour launcher cfr projet `launcher [-i|--interactive|-a|--automatic] image [database_path]` et enfin pour img-search on doit encore faire le code hahaha.
-
+Juste mqke puis commencer à faire les tests.
 ## Objectif du Projet
 
 En tant que fervents amateurs de Pokémon, nous avons entrepris de créer un système ingénieux permettant à nos amis d'identifier le numéro de Pokédex associé à un Pokémon à partir de son image, même dans des conditions où l'image pourrait être partiellement dégradée ou présenter des couleurs variées. Pour réaliser cette tâche de manière robuste, nous avons opté pour un système de hachage perceptif, qui nous est fourni, afin de comparer efficacement les différentes images de notre base de données.
