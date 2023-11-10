@@ -2,8 +2,7 @@
 #include "imgSearchFunctions.h"
 
 int main(int argc, char* argv[]) {
-    // ... (Autres déclarations de variables et initialisations si nécessaire)
-
+    
     // Enregistrez le gestionnaire de signal pour SIGINT
     signal(SIGINT, sigintHandler);
 
