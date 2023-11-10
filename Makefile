@@ -1,6 +1,6 @@
 # Makefile
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++11 -O2 -lrt
+CXXFLAGS = -Wall -Wextra -std=c++11 -O2 -Wpedantic -lrt
 OBJS = search-img/imgSearchFunctions.o search-img/main.o  # Mettez à jour le chemin des fichiers objets
 
 all: img-search
